@@ -1,0 +1,14 @@
+server:
+  port: 8082
+spring:
+  rabbitmq:
+    username: user
+    password: password
+    virtual-host: /
+    host: 139.196.112.185
+    port: 5672
+    listener:
+      simple:
+        acknowledge-mode: manual
+        retry:
+          enabled: true
