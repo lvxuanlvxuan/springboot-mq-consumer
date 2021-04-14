@@ -1,9 +1,10 @@
 package com.nb.springbootconsumer.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -112,6 +113,33 @@ public class DirectRabbitMqConfiguration {
         return BindingBuilder.bind(testDirectQueue()).to(directExchange()).with("test");
     }
 
+    @Bean("SMS_CONTAINER_FACTORY")
+    public SimpleRabbitListenerContainerFactory smsContainerFactory(SimpleRabbitListenerContainerFactoryConfigurer configurer,
+                                                                    ConnectionFactory connectionFactory){
+        SimpleRabbitListenerContainerFactory factory=getSimpleRabbitListenerContainerFactory(configurer,connectionFactory);
+        return factory;
+
+    }
+
+    @Bean("EMAIL_CONTAINER_FACTORY")
+    public SimpleRabbitListenerContainerFactory emailContainerFactory(SimpleRabbitListenerContainerFactoryConfigurer configurer,
+                                                                    ConnectionFactory connectionFactory){
+        SimpleRabbitListenerContainerFactory factory=getSimpleRabbitListenerContainerFactory(configurer,connectionFactory);
+        return factory;
+
+    }
+
+    public SimpleRabbitListenerContainerFactory getSimpleRabbitListenerContainerFactory(SimpleRabbitListenerContainerFactoryConfigurer configurer,
+                                                                                        ConnectionFactory connectionFactory){
+
+        SimpleRabbitListenerContainerFactory factory=new SimpleRabbitListenerContainerFactory();
+
+        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+        factory.setMessageConverter(new Jackson2JsonMessageConverter());
+        configurer.configure(factory,connectionFactory);
+
+        return factory;
+    }
 
 
 }
