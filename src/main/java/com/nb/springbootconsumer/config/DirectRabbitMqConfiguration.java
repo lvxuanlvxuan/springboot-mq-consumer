@@ -85,6 +85,7 @@ public class DirectRabbitMqConfiguration {
     public Queue testDirectQueue(){
         return new Queue("direct.queue.test",true);
     }
+
     @Bean
     public Binding deadDirectBinding(){
         return BindingBuilder.bind(deadDirectQueue()).to(directDeadExchange()).with("dead");
@@ -133,7 +134,10 @@ public class DirectRabbitMqConfiguration {
                                                                                         ConnectionFactory connectionFactory){
 
         SimpleRabbitListenerContainerFactory factory=new SimpleRabbitListenerContainerFactory();
-
+        //最大投递数
+        factory.setPrefetchCount(50);
+        //默认消费者数量
+        factory.setConcurrentConsumers(50);
         factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         factory.setMessageConverter(new Jackson2JsonMessageConverter());
         configurer.configure(factory,connectionFactory);
