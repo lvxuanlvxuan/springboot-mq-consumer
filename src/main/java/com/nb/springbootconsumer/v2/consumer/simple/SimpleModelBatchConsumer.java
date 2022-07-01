@@ -1,14 +1,19 @@
-package com.nb.springbootconsumer.v2.config;
+package com.nb.springbootconsumer.v2.consumer.simple;
 
+import com.nb.springbootconsumer.vo.OrderVO;
 import com.nb.springbootrabbitmq.v2.constance.SimpleModelConstance;
-import org.springframework.amqp.core.Queue;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import com.rabbitmq.client.Channel;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @Author: lvxuan
  * @program:
- * @Date: 2022/7/1 15:04
+ * @Date: 2022/7/1 15:53
  * @Version: 1.0
  * @motto: 而后乃将图南
  * @Description: des
@@ -25,28 +30,14 @@ import org.springframework.context.annotation.Configuration;
  * ▀▒▀▐▄█▄█▌▄░▀▒▒░░░░░░░░░░▒▒▒
  * You are not expected to understand this
  */
-@Configuration
-public class SimpleModelConfig {
+@Slf4j
+@Component
+public class SimpleModelBatchConsumer {
 
-    @Bean
-    public Queue simpleModelQueue() {
-        /**
-         * 1.队列名称
-         * 2.是否持久化
-         * 3.是否排他
-         * 4.是否自动删除
-         */
-        return new Queue(SimpleModelConstance.SIMPLE_MODEL_QUEUE, true, false, false);
-    }
-
-    @Bean
-    public Queue simpleModelQueueBatch() {
-        /**
-         * 1.队列名称
-         * 2.是否持久化
-         * 3.是否排他
-         * 4.是否自动删除
-         */
-        return new Queue(SimpleModelConstance.SIMPLE_MODEL_QUEUE_BATCH, true, false, false);
+    @RabbitListener(queues = SimpleModelConstance.SIMPLE_MODEL_QUEUE_BATCH)
+    public void recieveMessage(List<OrderVO> orderVOS,
+                               Message message,
+                               Channel channel) {
+        log.info("simple_model_queue_batch接收到消息，{}", orderVOS);
     }
 }
