@@ -2,6 +2,7 @@ package com.nb.springbootconsumer.v2.consumer.direct;
 
 import com.nb.springbootconsumer.vo.OrderVO;
 import com.nb.springbootrabbitmq.v2.constance.DirectModelConstance;
+import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.core.Message;
@@ -10,7 +11,6 @@ import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
-import com.rabbitmq.client.Channel;
 
 import java.io.IOException;
 
@@ -41,6 +41,20 @@ public class DirectModelConsumer {
 
     @RabbitListener(containerFactory = DirectModelConstance.DIRECT_MODEL_CONTAINER_FACTORY,
             bindings = @QueueBinding(
+                    value = @Queue(value = DirectModelConstance.DIRECT_MODEL_DELAY_QUEUE, durable = "true", autoDelete = "false"),
+                    exchange = @Exchange(value = DirectModelConstance.DIRECT_MODEL_EXCHANGE, type = ExchangeTypes.DIRECT, durable = "true", autoDelete = "false", ignoreDeclarationExceptions = "true"),
+                    key = DirectModelConstance.DIRECT_MODEL_DELAY_KEY
+            ))
+    public void recieveDelayMessage(OrderVO vo,
+                                    Message message,
+                                    Channel channel) throws IOException {
+        log.info("【direct_model_delay_queue_first】接收到消息：{}", vo);
+        channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);
+//        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+    }
+
+    @RabbitListener(containerFactory = DirectModelConstance.DIRECT_MODEL_CONTAINER_FACTORY,
+            bindings = @QueueBinding(
                     value = @Queue(value = DirectModelConstance.DIRECT_MODEL_QUEUE, durable = "true", autoDelete = "false"),
                     exchange = @Exchange(value = DirectModelConstance.DIRECT_MODEL_EXCHANGE, type = ExchangeTypes.DIRECT, durable = "true", autoDelete = "false", ignoreDeclarationExceptions = "true"),
                     key = DirectModelConstance.DIRECT_MODEL_KEY
@@ -51,13 +65,17 @@ public class DirectModelConsumer {
         log.info("【direct_model_queue接收到一条消息】:{}", vo);
 
         int i = 11;
-        if (i > 10) {
+        if (i < 10) {
             /**
              * 消息id
              * 是否批量确认（确认之前堆积的消息）
              */
-            int a = i / 0;
-//            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+            try {
+                int a = i / 0;
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+            }catch (Exception e){
+                log.error(e.getMessage());
+            }
         } else {
 
             /**

@@ -38,7 +38,7 @@ public class DirectModelConfig {
         /**
          * 消费者数量类似核心线程数
          */
-
+        factory.setConcurrentConsumers(3);
         /**
          * 一个消费者一次最多接收的消息数量
          */
@@ -49,7 +49,7 @@ public class DirectModelConfig {
          * NONE:不做确认操作
          * AUTO:若无异常则自动签收，有异常则会不断的入队
          */
-        factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
+        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         configurer.configure(factory, connectionFactory);
         return factory;
     }
